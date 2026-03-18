@@ -1,0 +1,70 @@
+{
+  "context": null,
+  "consentKey": {
+    "consentTemplateKey": {
+      "domainName": "GenomDE_MV",
+      "name": "Teilnahmeerklärung GenomDE MV",
+      "version": "1.1"
+    },
+    "signerIds": [
+      {
+        "idType": "Patienten-ID",
+        "id": "12345678",
+        "orderNumber": 0
+      }
+    ],
+    "consentDate": "2026-03-17 12:00:00"
+  },
+  "previousPolicyStates": [
+    {
+      "key": {
+        "domainName": "GenomDE_MV",
+        "name": "case-identification",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "GenomDE_MV",
+        "name": "reidentification",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "GenomDE_MV",
+        "name": "sequencing",
+        "version": "1.0"
+      },
+      "value": false
+    }
+  ],
+  "currentPolicyStates": [
+    {
+      "key": {
+        "domainName": "GenomDE_MV",
+        "name": "case-identification",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "GenomDE_MV",
+        "name": "reidentification",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "GenomDE_MV",
+        "name": "sequencing",
+        "version": "1.0"
+      },
+      "value": true
+    }
+  ]
+}

@@ -1,0 +1,438 @@
+{
+  "context": null,
+  "consentKey": {
+    "consentTemplateKey": {
+      "domainName": "MII",
+      "name": "Patienteneinwilligung MII",
+      "version": "1.6.m"
+    },
+    "signerIds": [
+      {
+        "idType": "Patienten-ID",
+        "id": "12345678",
+        "orderNumber": 0
+      }
+    ],
+    "consentDate": "2026-03-17 12:00:00"
+  },
+  "previousPolicyStates": [
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_retro_speichern_verarbeiten",
+        "version": "1.1"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "IDAT_erheben",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_retro_wissenschaftlich_nutzen",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_Analysedaten_zusammenfuehren_Dritte",
+        "version": "1.1"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_Zusatzbefund",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_pro_wissenschaftlich_nutzen",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_lagern_verarbeiten",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_retro_uebertragen",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_KVNR_5J_retro_uebertragen",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "MDAT_erheben",
+        "version": "1.1"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_pro_speichern_verarbeiten",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_Verknuepfung_Datenbanken",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_weitere_Studien",
+        "version": "1.1"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "IDAT_bereitstellen_EU_DSGVO_konform",
+        "version": "1.1"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "IDAT_speichern_verarbeiten",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "MDAT_speichern_verarbeiten",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_erheben",
+        "version": "1.1"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_KVNR_5J_pro_uebertragen",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_weitere_Erhebung",
+        "version": "1.1"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_Zusatzmengen_entnehmen",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "IDAT_zusammenfuehren_Dritte",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "MDAT_zusammenfuehren_Dritte",
+        "version": "1.0"
+      },
+      "value": false
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_pro_uebertragen",
+        "version": "1.0"
+      },
+      "value": false
+    }
+  ],
+  "currentPolicyStates": [
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_retro_speichern_verarbeiten",
+        "version": "1.1"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "IDAT_erheben",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_retro_wissenschaftlich_nutzen",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_Analysedaten_zusammenfuehren_Dritte",
+        "version": "1.1"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_Zusatzbefund",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_pro_wissenschaftlich_nutzen",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_lagern_verarbeiten",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_retro_uebertragen",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_KVNR_5J_retro_uebertragen",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "MDAT_erheben",
+        "version": "1.1"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_pro_speichern_verarbeiten",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_Verknuepfung_Datenbanken",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_weitere_Studien",
+        "version": "1.1"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "IDAT_bereitstellen_EU_DSGVO_konform",
+        "version": "1.1"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "IDAT_speichern_verarbeiten",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "MDAT_speichern_verarbeiten",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_erheben",
+        "version": "1.1"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_KVNR_5J_pro_uebertragen",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "Rekontaktierung_weitere_Erhebung",
+        "version": "1.1"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "BIOMAT_Zusatzmengen_entnehmen",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "IDAT_zusammenfuehren_Dritte",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "MDAT_zusammenfuehren_Dritte",
+        "version": "1.0"
+      },
+      "value": true
+    },
+    {
+      "key": {
+        "domainName": "MII",
+        "name": "KKDAT_5J_pro_uebertragen",
+        "version": "1.0"
+      },
+      "value": true
+    }
+  ]
+}
