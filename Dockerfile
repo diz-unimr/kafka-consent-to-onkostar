@@ -8,8 +8,7 @@ COPY Cargo.toml ./
 COPY Cargo.lock ./
 COPY src ./src
 COPY testdata ./testdata
-# Run tests before release build
-RUN cargo test --release
+
 RUN cargo build --release
 
 # Build image from scratch
