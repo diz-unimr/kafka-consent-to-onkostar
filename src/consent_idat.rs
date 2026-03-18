@@ -1,6 +1,5 @@
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
-use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, serde::Deserialize)]

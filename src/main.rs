@@ -4,12 +4,16 @@ mod consent_idat;
 use crate::cli::Cli;
 use crate::consent_idat::ConsentType;
 use clap::Parser;
+
 use rdkafka::config::RDKafkaLogLevel;
 use rdkafka::consumer::{Consumer, StreamConsumer};
 use rdkafka::{ClientConfig, Message};
 use std::error::Error;
 use std::sync::LazyLock;
 use tracing::{error, info};
+
+#[cfg(test)]
+use httpmock::MockServer;
 
 #[cfg(not(test))]
 static CONFIG: LazyLock<Cli> = LazyLock::new(Cli::parse);
@@ -129,13 +133,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[cfg(test)]
+static MOCK_SERVER: LazyLock<MockServer> = LazyLock::new(|| {
+    let server = MockServer::start();
+    println!("Starting mock server at {}", server.base_url());
+    server
+});
+
 // Test Configuration
 #[cfg(test)]
 static CONFIG: LazyLock<Cli> = LazyLock::new(|| Cli {
     bootstrap_servers: "localhost:9094".to_string(),
     topic: "test-topic".to_string(),
     group_id: "test-group-id".to_string(),
-    onkostar_uri: "http://localhost:8000/api".to_string(),
+    onkostar_uri: format!("{}/onkostar", MOCK_SERVER.base_url()),
     onkostar_username: None,
     onkostar_password: None,
     ssl_ca_file: None,
@@ -144,4 +155,37 @@ static CONFIG: LazyLock<Cli> = LazyLock::new(|| Cli {
     ssl_key_password: None,
 });
 
-mod tests {}
+#[cfg(test)]
+mod tests {
+    use crate::consent_idat::ConsentType;
+    use crate::{MOCK_SERVER, send_consent};
+    use httpmock::Method::PUT;
+
+    #[tokio::test]
+    async fn test_should_send_genomde_consent_to_onkostar() {
+        let mock = MOCK_SERVER.mock(|when, then| {
+            when.method(PUT)
+                .path("/onkostar/x-api/patient/12345678/consent/mv64e");
+            then.status(202);
+        });
+
+        let result = send_consent("12345678", ConsentType::GenomDe, "").await;
+
+        mock.assert();
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_should_send_broad_consent_to_onkostar() {
+        let mock = MOCK_SERVER.mock(|when, then| {
+            when.method(PUT)
+                .path("/onkostar/x-api/patient/12345678/consent/research");
+            then.status(202);
+        });
+
+        let result = send_consent("12345678", ConsentType::BroadConsent, "").await;
+
+        mock.assert();
+        assert!(result.is_ok());
+    }
+}
