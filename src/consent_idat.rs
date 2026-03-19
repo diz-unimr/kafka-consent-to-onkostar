@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_genomde_consent_idat() {
-        static JSON: &str = include_str!("../testdata/genom-de_consent.json");
+        static JSON: &str = include_str!("../resources/testdata/genom-de_consent.json");
 
         let actual: ConsentIdat = serde_json::from_str(JSON).unwrap();
         assert!(actual.is_genomde());
@@ -188,7 +188,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_mii_consent_idat() {
-        static JSON: &str = include_str!("../testdata/mii_consent.json");
+        static JSON: &str = include_str!("../resources/testdata/mii_consent.json");
 
         let actual: ConsentIdat = serde_json::from_str(JSON).unwrap();
         assert!(actual.is_broad_consent());

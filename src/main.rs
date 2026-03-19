@@ -185,11 +185,11 @@ mod tests {
 
     #[rstest]
     #[case(
-        "testdata/genom-de_consent.json",
+        "resources/testdata/genom-de_consent.json",
         "/x-api/patient/12345678/consent/mv64e"
     )]
     #[case(
-        "testdata/mii_consent.json",
+        "resources/testdata/mii_consent.json",
         "/x-api/patient/12345678/consent/research"
     )]
     #[tokio::test(flavor = "multi_thread")]

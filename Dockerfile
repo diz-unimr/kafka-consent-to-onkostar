@@ -7,7 +7,7 @@ WORKDIR /build
 COPY Cargo.toml ./
 COPY Cargo.lock ./
 COPY src ./src
-COPY testdata ./testdata
+COPY resources ./resources
 
 RUN cargo build --release
 
