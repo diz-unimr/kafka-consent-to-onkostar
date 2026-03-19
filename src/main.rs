@@ -5,6 +5,7 @@ mod http_client;
 use crate::cli::Cli;
 use crate::consent_idat::ConsentType;
 
+use futures::StreamExt;
 use rdkafka::config::RDKafkaLogLevel;
 use rdkafka::consumer::{Consumer, StreamConsumer};
 use rdkafka::{ClientConfig, Message};
@@ -24,7 +25,9 @@ async fn start_service(
     consumer: StreamConsumer,
     http_client: HttpClient,
 ) -> Result<(), Box<dyn Error>> {
-    while let Ok(msg) = consumer.recv().await {
+    let mut stream = consumer.stream();
+
+    while let Some(Ok(msg)) = stream.next().await {
         let message = msg.payload().unwrap_or_default();
         let message_str = std::str::from_utf8(message).unwrap_or_default();
         let consent_idat: consent_idat::ConsentIdat = match serde_json::from_str(message_str) {
