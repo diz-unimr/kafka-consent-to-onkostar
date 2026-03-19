@@ -2,11 +2,16 @@ use crate::consent_idat::ConsentType;
 
 pub(crate) struct HttpClient {
     base_url: String,
+    username: String,
+    password: Option<String>,
     client: reqwest::Client,
 }
 
 impl HttpClient {
-    pub(crate) fn new(base_url: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub(crate) fn new(
+        base_url: &str,
+        credentials: Option<(&str, &str)>,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let user_agent_string = format!("{}/{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
         let client = reqwest::Client::builder()
             .user_agent(user_agent_string)
@@ -20,7 +25,20 @@ impl HttpClient {
             base_url.to_string()
         };
 
-        Ok(Self { base_url, client })
+        match credentials {
+            Some((username, password)) => Ok(Self {
+                base_url,
+                username: username.to_string(),
+                password: Some(password.to_string()),
+                client,
+            }),
+            None => Ok(Self {
+                base_url,
+                username: String::new(),
+                password: None,
+                client,
+            }),
+        }
     }
 
     pub(crate) async fn send_consent(
@@ -44,11 +62,82 @@ impl HttpClient {
         let _ = self
             .client
             .put(url)
+            .basic_auth(self.username.clone(), self.password.clone())
             .json(&content)
             .send()
             .await
             .map_err(|e| e.to_string())?;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod tests {
+    use crate::consent_idat::ConsentType;
+    use crate::http_client::HttpClient;
+    use httpmock::Method::PUT;
+    use httpmock::MockServer;
+
+    #[tokio::test]
+    async fn test_should_send_genomde_consent_to_onkostar() {
+        let mock_server = MockServer::start();
+        let mock = mock_server.mock(|when, then| {
+            when.method(PUT)
+                .path_prefix("/x-api/patient/12345678/consent/mv64e");
+            then.status(202);
+        });
+
+        let http_client =
+            HttpClient::new(&mock_server.base_url(), None).expect("Failed to create http client");
+
+        let result = http_client
+            .send_consent("12345678", ConsentType::GenomDe, "")
+            .await;
+
+        mock.assert_async().await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_should_send_broad_consent_to_onkostar() {
+        let mock_server = MockServer::start();
+        let mock = mock_server.mock(|when, then| {
+            when.method(PUT)
+                .path_prefix("/x-api/patient/12345678/consent/research");
+            then.status(202);
+        });
+
+        let http_client =
+            HttpClient::new(&mock_server.base_url(), None).expect("Failed to create http client");
+
+        let result = http_client
+            .send_consent("12345678", ConsentType::BroadConsent, "")
+            .await;
+
+        mock.assert_async().await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_should_send_consent_to_onkostar_using_http_basic_auth() {
+        let mock_server = MockServer::start();
+        let mock = mock_server.mock(|when, then| {
+            when.method(PUT)
+                .header("Authorization", "Basic dXNlcjpwYXNz")
+                .path_prefix("/x-api/patient/12345678/consent/research");
+            then.status(202);
+        });
+
+        let http_client = HttpClient::new(&mock_server.base_url(), Some(("user", "pass")))
+            .expect("Failed to create http client");
+
+        let result = http_client
+            .send_consent("12345678", ConsentType::BroadConsent, "")
+            .await;
+
+        mock.assert_async().await;
+        assert!(result.is_ok());
     }
 }

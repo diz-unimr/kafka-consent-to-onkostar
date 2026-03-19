@@ -105,7 +105,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let topic: &str = &CONFIG.topic.clone();
     consumer.subscribe(&[topic])?;
 
-    let http_client = HttpClient::new(&CONFIG.onkostar_uri)?;
+    let http_client = if let Some(username) = &CONFIG.onkostar_username
+        && let Some(password) = &CONFIG.onkostar_password
+    {
+        HttpClient::new(&CONFIG.onkostar_uri, Some((username, password)))?
+    } else {
+        HttpClient::new(&CONFIG.onkostar_uri, None)?
+    };
+
     start_service(consumer, http_client).await?;
 
     Ok(())
@@ -130,7 +137,6 @@ static CONFIG: LazyLock<Cli> = LazyLock::new(|| Cli {
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod tests {
-    use crate::consent_idat::ConsentType;
     use crate::http_client::HttpClient;
     use crate::start_service;
     use httpmock::Method::PUT;
@@ -142,46 +148,6 @@ mod tests {
     use rstest::rstest;
     use std::fs;
     use std::time::Duration;
-
-    #[tokio::test]
-    async fn test_should_send_genomde_consent_to_onkostar() {
-        let mock_server = MockServer::start();
-        let mock = mock_server.mock(|when, then| {
-            when.method(PUT)
-                .path_prefix("/x-api/patient/12345678/consent/mv64e");
-            then.status(202);
-        });
-
-        let http_client =
-            HttpClient::new(&mock_server.base_url()).expect("Failed to create http client");
-
-        let result = http_client
-            .send_consent("12345678", ConsentType::GenomDe, "")
-            .await;
-
-        mock.assert_async().await;
-        assert!(result.is_ok());
-    }
-
-    #[tokio::test]
-    async fn test_should_send_broad_consent_to_onkostar() {
-        let mock_server = MockServer::start();
-        let mock = mock_server.mock(|when, then| {
-            when.method(PUT)
-                .path_prefix("/x-api/patient/12345678/consent/research");
-            then.status(202);
-        });
-
-        let http_client =
-            HttpClient::new(&mock_server.base_url()).expect("Failed to create http client");
-
-        let result = http_client
-            .send_consent("12345678", ConsentType::BroadConsent, "")
-            .await;
-
-        mock.assert_async().await;
-        assert!(result.is_ok());
-    }
 
     #[rstest]
     #[case(
@@ -201,7 +167,7 @@ mod tests {
         });
 
         let http_client =
-            HttpClient::new(&mock_server.base_url()).expect("Failed to create http client");
+            HttpClient::new(&mock_server.base_url(), None).expect("Failed to create http client");
 
         let mock_cluster = MockCluster::new(1).expect("Failed to create mock cluster");
         let bootstrap = mock_cluster.bootstrap_servers();
@@ -229,8 +195,6 @@ mod tests {
             )
             .await
             .expect("Failed to send record");
-
-        tokio::time::sleep(Duration::from_millis(100)).await;
 
         let _ = tokio::time::timeout(Duration::from_secs(5), async move {
             let _ = start_service(consumer, http_client).await;
