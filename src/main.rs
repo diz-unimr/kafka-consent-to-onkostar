@@ -5,7 +5,7 @@ mod http_client;
 use crate::cli::Cli;
 use crate::consent_idat::ConsentType;
 
-use futures::StreamExt;
+use futures::TryStreamExt;
 use rdkafka::config::RDKafkaLogLevel;
 use rdkafka::consumer::{Consumer, StreamConsumer};
 use rdkafka::{ClientConfig, Message};
@@ -21,49 +21,57 @@ use clap::Parser;
 #[cfg(not(test))]
 static CONFIG: LazyLock<Cli> = LazyLock::new(Cli::parse);
 
-async fn start_service(
-    consumer: StreamConsumer,
-    http_client: HttpClient,
-) -> Result<(), Box<dyn Error>> {
-    let mut stream = consumer.stream();
+async fn start_service(consumer: StreamConsumer, http_client: &HttpClient) -> Result<(), String> {
+    let stream = consumer
+        .stream()
+        .map_err(|e| e.to_string())
+        .try_for_each(|msg| async move {
+            let message = msg.payload().unwrap_or_default();
+            let message_str = std::str::from_utf8(message).unwrap_or_default();
 
-    while let Some(Ok(msg)) = stream.next().await {
-        let message = msg.payload().unwrap_or_default();
-        let message_str = std::str::from_utf8(message).unwrap_or_default();
-        let consent_idat: consent_idat::ConsentIdat = match serde_json::from_str(message_str) {
-            Ok(idat) => idat,
-            Err(e) => {
-                error!("Failed to parse consent IDAT: {e}");
-                continue;
-            }
-        };
-
-        if consent_idat.is_genomde() {
-            let patient_id = consent_idat.patient_id();
-            match http_client
-                .send_consent(&patient_id, ConsentType::GenomDe, message_str)
-                .await
-            {
-                Ok(()) => info!("GenomDE consent for '{patient_id}' sent to Onkostar"),
+            let consent_idat: consent_idat::ConsentIdat = match serde_json::from_str(message_str) {
+                Ok(idat) => idat,
                 Err(e) => {
-                    error!("Failed to send GenomDE consent for '{patient_id}' to Onkostar: {e}");
+                    error!("Failed to parse consent IDAT: {e}");
+                    return Err(e.to_string());
                 }
-            }
-        } else if consent_idat.is_broad_consent() {
+            };
             let patient_id = consent_idat.patient_id();
-            match http_client
-                .send_consent(&patient_id, ConsentType::BroadConsent, message_str)
-                .await
-            {
-                Ok(()) => info!("MII consent for '{patient_id}' sent to Onkostar"),
-                Err(e) => {
-                    error!("Failed to send MII consent for '{patient_id}'  to Onkostar: {e}");
-                }
-            }
-        }
-    }
 
-    Err("Service stopped".into())
+            if consent_idat.is_genomde() {
+                return match http_client
+                    .send_consent(&patient_id, ConsentType::GenomDe, message_str)
+                    .await
+                {
+                    Ok(()) => {
+                        info!("GenomDE consent for '{patient_id}' sent to Onkostar");
+                        Ok(())
+                    }
+                    Err(e) => Err(format!(
+                        "Failed to send GenomDE consent for '{patient_id}'  to Onkostar: {e}"
+                    )),
+                };
+            } else if consent_idat.is_broad_consent() {
+                return match http_client
+                    .send_consent(&patient_id, ConsentType::BroadConsent, message_str)
+                    .await
+                {
+                    Ok(()) => {
+                        info!("MII consent for '{patient_id}' sent to Onkostar");
+                        Ok(())
+                    }
+                    Err(e) => Err(format!(
+                        "Failed to send MII consent for '{patient_id}'  to Onkostar: {e}"
+                    )),
+                };
+            }
+            Err("Invalid consent type".into())
+        });
+
+    info!("Starting kafka consumer");
+    let err = stream.await;
+    info!("Stopping kafka consumer");
+    err
 }
 
 #[tokio::main]
@@ -96,9 +104,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let consumer: StreamConsumer = client_config
         .set("group.id", &CONFIG.group_id)
-        .set("enable.partition.eof", "false")
         .set("auto.offset.reset", "earliest")
-        .set("enable.auto.commit", "false")
         .set_log_level(RDKafkaLogLevel::Debug)
         .create()?;
 
@@ -113,7 +119,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         HttpClient::new(&CONFIG.onkostar_uri, None)?
     };
 
-    start_service(consumer, http_client).await?;
+    start_service(consumer, &http_client).await?;
 
     Ok(())
 }
@@ -158,7 +164,7 @@ mod tests {
         "resources/testdata/mii_consent.json",
         "/x-api/patient/12345678/consent/research"
     )]
-    #[tokio::test(flavor = "multi_thread")]
+    #[tokio::test]
     async fn test_should_handle_kafka_record(#[case] file: &str, #[case] expected_path: &str) {
         let mock_server = MockServer::start();
         let mock = mock_server.mock(|when, then| {
@@ -178,7 +184,6 @@ mod tests {
             .set("auto.offset.reset", "earliest")
             .create()
             .expect("Failed to create consumer");
-
         consumer.subscribe(&["test-topic"]).expect("subscriber");
 
         let producer: FutureProducer = ClientConfig::new()
@@ -186,8 +191,9 @@ mod tests {
             .create()
             .expect("Failed to create producer");
 
-        let json = fs::read_to_string(file).expect("Failed to read file");
+        await_stable_mock_cluster(&producer, &consumer).await;
 
+        let json = fs::read_to_string(file).expect("Failed to read file");
         producer
             .send(
                 FutureRecord::to("test-topic").payload(&json).key("random"),
@@ -196,11 +202,65 @@ mod tests {
             .await
             .expect("Failed to send record");
 
-        let _ = tokio::time::timeout(Duration::from_secs(5), async move {
-            let _ = start_service(consumer, http_client).await;
-        })
+        let _ = tokio::time::timeout(
+            Duration::from_millis(500),
+            start_service(consumer, &http_client),
+        )
         .await;
 
-        mock.assert_async().await;
+        mock.assert();
+    }
+
+    #[allow(clippy::panic)]
+    #[tokio::test]
+    async fn test_should_stop_service_on_bad_payload() {
+        let http_client =
+            HttpClient::new("https://???:1234567", None).expect("Failed to create http client");
+
+        let mock_cluster = MockCluster::new(1).expect("Failed to create mock cluster");
+        let bootstrap = mock_cluster.bootstrap_servers();
+
+        let consumer: StreamConsumer = ClientConfig::new()
+            .set("bootstrap.servers", &bootstrap)
+            .set("group.id", "test-group")
+            .set("auto.offset.reset", "earliest")
+            .create()
+            .expect("Failed to create consumer");
+        consumer.subscribe(&["test-topic"]).expect("subscriber");
+
+        let producer: FutureProducer = ClientConfig::new()
+            .set("bootstrap.servers", &bootstrap)
+            .create()
+            .expect("Failed to create producer");
+
+        await_stable_mock_cluster(&producer, &consumer).await;
+
+        producer
+            .send(
+                FutureRecord::to("test-topic")
+                    .payload("bad payload")
+                    .key("random"),
+                Duration::from_secs(0),
+            )
+            .await
+            .expect("Failed to send record");
+
+        let result = start_service(consumer, &http_client).await;
+        assert!(result.is_err());
+    }
+
+    async fn await_stable_mock_cluster(producer: &FutureProducer, consumer: &StreamConsumer) {
+        // Wait for Consumer to get ready
+        producer
+            .send(
+                FutureRecord::to("test-topic")
+                    .payload("initial-payload")
+                    .key("random"),
+                Duration::from_secs(0),
+            )
+            .await
+            .expect("Failed to send initial record");
+        let _ = consumer.recv().await;
+        // Consumer is ready to receive messages from Mock Cluster
     }
 }
