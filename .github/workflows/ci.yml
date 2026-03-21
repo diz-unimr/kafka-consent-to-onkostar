@@ -41,7 +41,6 @@ jobs:
       - name: Image build
         run: |
           docker build -t ghcr.io/${{ github.repository }} .
-          docker tag ghcr.io/${{ github.repository }} ghcr.io/${{ github.repository }}:${{ github.ref_name }}
 
       - name: Login to Docker Hub
         if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
@@ -54,5 +53,6 @@ jobs:
       - name: Docker Push
         if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
         run: |
+          docker tag ghcr.io/${{ github.repository }} ghcr.io/${{ github.repository }}:${{ github.ref_name }}
           docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-          docker push ghcr.io/${{ github.repository }}:latest
+          docker push ghcr.io/${{ github.repository }}
