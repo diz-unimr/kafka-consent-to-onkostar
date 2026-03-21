@@ -55,4 +55,4 @@ jobs:
         if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
         run: |
           docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-          docker push ghcr.io/${{ github.repository }}
+          docker push ghcr.io/${{ github.repository }}:latest
