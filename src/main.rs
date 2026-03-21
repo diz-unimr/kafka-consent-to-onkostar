@@ -202,12 +202,11 @@ mod tests {
             .await
             .expect("Failed to send record");
 
-        let _ = tokio::time::timeout(
-            Duration::from_millis(500),
-            start_service(consumer, &http_client),
-        )
-        .await;
+        let handle = start_service(consumer, &http_client);
 
+        await_service_stop(&producer, handle).await;
+
+        // Assert that the mock server received the expected request
         mock.assert();
     }
 
@@ -249,6 +248,46 @@ mod tests {
         assert!(result.is_err());
     }
 
+    #[rstest]
+    #[case("/x-api/patient/12345678/consent/mv64e")]
+    #[case("/x-api/patient/12345678/consent/research")]
+    #[tokio::test]
+    async fn test_should_not_send_request(#[case] expected_path: &str) {
+        let mock_server = MockServer::start();
+        let mock = mock_server.mock(|when, then| {
+            when.method(PUT).path(expected_path);
+            then.status(202);
+        });
+
+        let http_client =
+            HttpClient::new(&mock_server.base_url(), None).expect("Failed to create http client");
+
+        let mock_cluster = MockCluster::new(1).expect("Failed to create mock cluster");
+        let bootstrap = mock_cluster.bootstrap_servers();
+
+        let consumer: StreamConsumer = ClientConfig::new()
+            .set("bootstrap.servers", &bootstrap)
+            .set("group.id", "test-group")
+            .set("auto.offset.reset", "earliest")
+            .create()
+            .expect("Failed to create consumer");
+        consumer.subscribe(&["test-topic"]).expect("subscriber");
+
+        let producer: FutureProducer = ClientConfig::new()
+            .set("bootstrap.servers", &bootstrap)
+            .create()
+            .expect("Failed to create producer");
+
+        await_stable_mock_cluster(&producer, &consumer).await;
+
+        let handle = start_service(consumer, &http_client);
+
+        await_service_stop(&producer, handle).await;
+
+        // Assert that the mock server received no request
+        mock.assert_calls(0);
+    }
+
     async fn await_stable_mock_cluster(producer: &FutureProducer, consumer: &StreamConsumer) {
         // Wait for Consumer to get ready
         producer
@@ -262,5 +301,20 @@ mod tests {
             .expect("Failed to send initial record");
         let _ = consumer.recv().await;
         // Consumer is ready to receive messages from Mock Cluster
+    }
+
+    async fn await_service_stop(producer: &FutureProducer, handle: impl Future) {
+        // Bad record content to stop the service
+        producer
+            .send(
+                FutureRecord::to("test-topic")
+                    .payload("bad payload")
+                    .key("random"),
+                Duration::from_secs(0),
+            )
+            .await
+            .expect("Failed to send record");
+
+        handle.await;
     }
 }
