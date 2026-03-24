@@ -59,7 +59,7 @@ pub(crate) struct ConsentKey {
 pub(crate) enum ConsentTemplateKey {
     GenomDe { version: String },
     BroadConsent { version: String },
-    Other,
+    Other(String),
 }
 
 impl<'de> Deserialize<'de> for ConsentTemplateKey {
@@ -82,7 +82,7 @@ impl<'de> Deserialize<'de> for ConsentTemplateKey {
             "MII" => Ok(ConsentTemplateKey::BroadConsent {
                 version: version.to_string(),
             }),
-            _ => Ok(ConsentTemplateKey::Other),
+            _ => Ok(ConsentTemplateKey::Other(domain_name.to_string())),
         }
     }
 }
@@ -146,7 +146,7 @@ mod tests {
     fn test_deserialize_other_template_key() {
         let json_str = r#"{"domainName": "OTHER", "version": "1.6.m"}"#;
         let actual: ConsentTemplateKey = serde_json::from_str(json_str).unwrap();
-        assert_eq!(actual, ConsentTemplateKey::Other);
+        assert_eq!(actual, ConsentTemplateKey::Other("OTHER".to_string()));
     }
 
     #[test]
