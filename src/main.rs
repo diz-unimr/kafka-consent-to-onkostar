@@ -17,6 +17,7 @@ use crate::http_client::HttpClient;
 
 #[cfg(not(test))]
 use clap::Parser;
+use tokio::time;
 
 #[cfg(not(test))]
 static CONFIG: LazyLock<Cli> = LazyLock::new(Cli::parse);
@@ -26,6 +27,9 @@ async fn start_service(consumer: StreamConsumer, http_client: &HttpClient) -> Re
         .stream()
         .map_err(|e| e.to_string())
         .try_for_each(|msg| async move {
+            let key = msg.key().unwrap_or_default();
+            let key_str = std::str::from_utf8(key).unwrap_or_default();
+
             let message = msg.payload().unwrap_or_default();
             let message_str = std::str::from_utf8(message).unwrap_or_default();
 
@@ -33,7 +37,9 @@ async fn start_service(consumer: StreamConsumer, http_client: &HttpClient) -> Re
                 Ok(idat) => idat,
                 Err(e) => {
                     error!("Failed to parse consent IDAT: {e}");
-                    return Err(e.to_string());
+                    return Err(format!(
+                        "Failed to parse consent IDAT für message '{key_str}': {e}"
+                    ));
                 }
             };
             let patient_id = consent_idat.patient_id();
@@ -45,11 +51,13 @@ async fn start_service(consumer: StreamConsumer, http_client: &HttpClient) -> Re
                 {
                     Ok(()) => {
                         info!("GenomDE consent for '{patient_id}' sent to Onkostar");
+                        time::sleep(time::Duration::from_secs(1)).await;
                         Ok(())
                     }
-                    Err(e) => Err(format!(
-                        "Failed to send GenomDE consent for '{patient_id}'  to Onkostar: {e}"
-                    )),
+                    Err(e) => {
+                        error!("Skipping GenomDE consent - {e}");
+                        Ok(())
+                    }
                 };
             } else if consent_idat.is_broad_consent() {
                 return match http_client
@@ -58,14 +66,19 @@ async fn start_service(consumer: StreamConsumer, http_client: &HttpClient) -> Re
                 {
                     Ok(()) => {
                         info!("MII consent for '{patient_id}' sent to Onkostar");
+                        time::sleep(time::Duration::from_secs(1)).await;
                         Ok(())
                     }
-                    Err(e) => Err(format!(
-                        "Failed to send MII consent for '{patient_id}'  to Onkostar: {e}"
-                    )),
+                    Err(e) => {
+                        error!("Skipping MII consent - {e}");
+                        Ok(())
+                    }
                 };
             }
-            Err("Invalid consent type".into())
+
+            info!("Consent '{key_str}' for '{patient_id}' is not a GenomDE or MII consent");
+
+            Ok(())
         });
 
     info!("Starting kafka consumer");
