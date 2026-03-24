@@ -89,6 +89,20 @@ async fn start_service(consumer: StreamConsumer, http_client: &HttpClient) -> Re
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        tracing_subscriber::fmt()
+            .with_max_level(tracing::Level::DEBUG)
+            .init();
+    }
+
+    #[cfg(not(debug_assertions))]
+    {
+        tracing_subscriber::fmt()
+            .with_max_level(tracing::Level::INFO)
+            .init();
+    }
+
     let mut client_config = ClientConfig::new();
     client_config.set("bootstrap.servers", &CONFIG.bootstrap_servers);
 
