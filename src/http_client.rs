@@ -59,14 +59,19 @@ impl HttpClient {
             }
         };
 
-        let _ = self
+        let res = self
             .client
-            .put(url)
+            .put(url.clone())
             .basic_auth(self.username.clone(), self.password.clone())
-            .json(&content)
+            .header("Content-Type", "application/json")
+            .body(content.to_string())
             .send()
             .await
             .map_err(|e| e.to_string())?;
+
+        if !res.status().is_success() {
+            return Err(format!("Failed to send consent to '{}': {}", url, res.status()).into());
+        }
 
         Ok(())
     }
