@@ -10,7 +10,7 @@ Beim Start der Anwendung können Parameter angegeben werden.
 Usage: kafka-consent-to-onkostar [OPTIONS] <ONKOSTAR_URI>
 
 Arguments:
-  <ONKOSTAR_URI>  
+  <ONKOSTAR_URI>  Onkostar URI for API requests [env: ONKOSTAR_URI=]
 
 Options:
       --bootstrap-servers <BOOTSTRAP_SERVERS>
