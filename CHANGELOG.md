@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/diz-unimr/kafka-consent-to-onkostar/compare/v0.1.2...v0.1.3) (2026-03-25)
+
+
+### Features
+
+* enable ONKOSTAR_URI env var ([bd40dc3](https://github.com/diz-unimr/kafka-consent-to-onkostar/commit/bd40dc34a613444eb3f3181edbe0af2e9104f135))
+
 ## [0.1.2](https://github.com/diz-unimr/kafka-consent-to-onkostar/compare/v0.1.1...v0.1.2) (2026-03-24)
 
 
