@@ -46,6 +46,7 @@ pub(crate) struct Cli {
     pub ssl_key_file: Option<String>,
     #[arg(long, env = "KAFKA_SSL_KEY_PASSWORD", help = "The SSL key password")]
     pub ssl_key_password: Option<String>,
+    #[arg(env = "ONKOSTAR_URI", help = "Onkostar URI for API requests")]
     pub onkostar_uri: String,
     #[arg(long, env = "ONKOSTAR_USERNAME", help = "Onkostar Username")]
     pub onkostar_username: Option<String>,
