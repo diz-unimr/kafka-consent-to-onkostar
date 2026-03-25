@@ -1,4 +1,4 @@
-use crate::consent_idat::ConsentType;
+use crate::service::consent_idat::ConsentType;
 
 pub(crate) struct HttpClient {
     base_url: String,
@@ -80,8 +80,8 @@ impl HttpClient {
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod tests {
-    use crate::consent_idat::ConsentType;
-    use crate::http_client::HttpClient;
+    use crate::service::consent_idat::ConsentType;
+    use crate::service::http_client::HttpClient;
     use httpmock::Method::PUT;
     use httpmock::MockServer;
 
