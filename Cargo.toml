@@ -18,9 +18,6 @@ rdkafka = { version = "0.39", features = ["cmake-build", "libz-static", "ssl-ven
 futures = "0.3"
 
 [dev-dependencies]
-tower = "0.5"
-http-body-util = "0.1"
-mockall = "0.14"
 rstest = "0.26"
 httpmock = "0.8"
 
