@@ -1,4 +1,5 @@
 use crate::service::consent_idat::ConsentType;
+use reqwest::StatusCode;
 
 pub(crate) struct HttpClient {
     base_url: String,
@@ -46,7 +47,7 @@ impl HttpClient {
         patient_id: &str,
         consent_type: ConsentType,
         content: &str,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<StatusCode, Box<dyn std::error::Error>> {
         let url = match consent_type {
             ConsentType::GenomDe => {
                 format!("{}/x-api/patient/{patient_id}/consent/mv64e", self.base_url)
@@ -73,7 +74,7 @@ impl HttpClient {
             return Err(format!("Failed to send consent to '{}': {}", url, res.status()).into());
         }
 
-        Ok(())
+        Ok(res.status())
     }
 }
 
