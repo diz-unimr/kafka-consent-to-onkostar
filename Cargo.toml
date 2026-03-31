@@ -16,6 +16,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rdkafka = { version = "0.39", features = ["cmake-build", "libz-static", "ssl-vendored", "curl-static"] }
 futures = "0.3"
+fhir-model = { version = "0.12", default-features = false, features = ["r4b"] }
 
 [dev-dependencies]
 rstest = "0.26"
