@@ -114,11 +114,11 @@ mod tests {
 
     #[rstest]
     #[case(
-        "resources/testdata/genom-de_consent.json",
+        "resources/testdata/genom-de_consent_fhir.json",
         "/x-api/patient/12345678/consent/mv64e"
     )]
     #[case(
-        "resources/testdata/mii_consent.json",
+        "resources/testdata/mii_consent_fhir.json",
         "/x-api/patient/12345678/consent/research"
     )]
     #[tokio::test]
