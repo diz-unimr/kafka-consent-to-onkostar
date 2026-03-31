@@ -1,6 +1,9 @@
+use fhir_model::DateTime::DateTime;
+use fhir_model::r4b::codes::ConsentProvisionType;
 use fhir_model::r4b::resources::{Bundle, Resource};
 use fhir_model::r4b::types::ExtensionValue;
 use std::str::FromStr;
+use time::format_description;
 
 pub struct ConsentFhirIdat {
     bundle: Bundle,
@@ -75,6 +78,42 @@ impl ConsentFhirIdat {
         }
         String::new()
     }
+
+    pub(crate) fn consent_date(&self) -> String {
+        for entry in self.bundle.entry.clone() {
+            if let Some(entry) = entry
+                && let Some(Resource::Consent(consent)) = entry.resource.clone()
+                && let Some(DateTime(date_time)) = &consent.date_time
+                && let Ok(format) =
+                    format_description::parse("[year]-[month]-[day] [hour]:[minute]:[second]")
+            {
+                return date_time.format(&format).unwrap_or_default();
+            }
+        }
+
+        String::new()
+    }
+
+    pub(crate) fn policy_state(&self, name: &str) -> bool {
+        for entry in self.bundle.entry.clone() {
+            if let Some(entry) = entry
+                && let Some(Resource::Consent(consent)) = entry.resource.clone()
+                && let Some(provision) = &consent.provision
+            {
+                for provision in provision.provision.clone().into_iter().flatten() {
+                    for code in provision.code.clone().into_iter().flatten() {
+                        for coding in code.coding.clone().into_iter().flatten() {
+                            if coding.code == Some(name.to_string()) {
+                                return provision.r#type.unwrap_or(ConsentProvisionType::Deny)
+                                    == ConsentProvisionType::Permit;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        false
+    }
 }
 
 impl FromStr for ConsentFhirIdat {
@@ -99,6 +138,12 @@ mod tests {
         let actual = ConsentFhirIdat::from_str(JSON).unwrap();
         assert!(actual.is_genomde());
         assert_eq!(actual.patient_id(), "12345678");
+
+        assert!(actual.policy_state("sequencing"));
+        assert!(actual.policy_state("case-identification"));
+        assert!(actual.policy_state("reidentification"));
+
+        assert!(!actual.policy_state("otherprovision"));
     }
 
     #[test]
