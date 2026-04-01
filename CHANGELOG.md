@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.4](https://github.com/diz-unimr/kafka-consent-to-onkostar/compare/v0.1.3...v0.1.4) (2026-04-01)
+
+
+### Features
+
+* log if procedure has been created or updated ([7c6eba3](https://github.com/diz-unimr/kafka-consent-to-onkostar/commit/7c6eba37ebdb257de522b7ee7edad320b707cf0f))
+* map fhir consent into idat json ([#7](https://github.com/diz-unimr/kafka-consent-to-onkostar/issues/7)) ([6de30b1](https://github.com/diz-unimr/kafka-consent-to-onkostar/commit/6de30b14e42c98bfe4c7a9d6adb126facabea231))
+* use fhir consent ([#6](https://github.com/diz-unimr/kafka-consent-to-onkostar/issues/6)) ([697ba1e](https://github.com/diz-unimr/kafka-consent-to-onkostar/commit/697ba1ebabfaf62cba380653f3b4964d871f7182))
+
 ## [0.1.3](https://github.com/diz-unimr/kafka-consent-to-onkostar/compare/v0.1.2...v0.1.3) (2026-03-25)
 
 
