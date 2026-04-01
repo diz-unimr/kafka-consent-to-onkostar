@@ -55,7 +55,6 @@ pub async fn start(consumer: StreamConsumer, http_client: &HttpClient) -> Result
                                 _ => "Unknown Status",
                             }
                         );
-                        time::sleep(time::Duration::from_secs(1)).await;
                         Ok(())
                     }
                     Err(e) => {
@@ -82,7 +81,6 @@ pub async fn start(consumer: StreamConsumer, http_client: &HttpClient) -> Result
                                 _ => "Unknown Status",
                             }
                         );
-                        time::sleep(time::Duration::from_secs(1)).await;
                         Ok(())
                     }
                     Err(e) => {

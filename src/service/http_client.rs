@@ -70,6 +70,8 @@ impl HttpClient {
             .await
             .map_err(|e| e.to_string())?;
 
+        tokio::time::sleep(tokio::time::Duration::from_millis(250)).await;
+
         if !res.status().is_success() {
             return Err(format!("Failed to send consent to '{}': {}", url, res.status()).into());
         }
