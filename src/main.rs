@@ -115,17 +115,25 @@ mod tests {
     #[rstest]
     #[case(
         "resources/testdata/genom-de_consent_fhir.json",
-        "/x-api/patient/12345678/consent/mv64e"
+        "/x-api/patient/12345678/consent/mv64e",
+        "resources/testdata/genom-de_consent_mapped.json"
     )]
     #[case(
         "resources/testdata/mii_consent_fhir.json",
-        "/x-api/patient/12345678/consent/research"
+        "/x-api/patient/12345678/consent/research",
+        "resources/testdata/mii_consent_mapped.json"
     )]
     #[tokio::test]
-    async fn test_should_handle_kafka_record(#[case] file: &str, #[case] expected_path: &str) {
+    async fn test_should_handle_kafka_record(
+        #[case] file: &str,
+        #[case] expected_path: &str,
+        #[case] expected_consent: &str,
+    ) {
+        let expected_content = fs::read_to_string(expected_consent).expect("Failed to read file");
+
         let mock_server = MockServer::start();
         let mock = mock_server.mock(|when, then| {
-            when.method(PUT).path(expected_path);
+            when.method(PUT).path(expected_path).body(expected_content);
             then.status(202);
         });
 

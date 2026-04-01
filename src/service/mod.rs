@@ -1,4 +1,5 @@
 use crate::service::consent_fhir_idat::ConsentFhirIdat;
+use crate::service::consent_idat::ConsentIdat;
 use consent_idat::ConsentType;
 use futures::TryStreamExt;
 use http_client::HttpClient;
@@ -33,11 +34,16 @@ pub async fn start(consumer: StreamConsumer, http_client: &HttpClient) -> Result
                     ));
                 }
             };
-            let patient_id = consent_fhir_idat.patient_id();
+            let patient_id = &consent_fhir_idat.patient_id();
 
             if consent_fhir_idat.is_genomde() {
+                let Ok(message_str) = serde_json::to_string(&ConsentIdat::from(consent_fhir_idat))
+                else {
+                    return Err(format!("Could not serialize JSON IDAT for: '{key_str}'"));
+                };
+
                 return match http_client
-                    .send_consent(&patient_id, ConsentType::GenomDe, message_str)
+                    .send_consent(patient_id, ConsentType::GenomDe, &message_str)
                     .await
                 {
                     Ok(status_code) => {
@@ -58,8 +64,13 @@ pub async fn start(consumer: StreamConsumer, http_client: &HttpClient) -> Result
                     }
                 };
             } else if consent_fhir_idat.is_broad_consent() {
+                let Ok(message_str) = serde_json::to_string(&ConsentIdat::from(consent_fhir_idat))
+                else {
+                    return Err(format!("Could not serialize JSON IDAT for: '{key_str}'"));
+                };
+
                 return match http_client
-                    .send_consent(&patient_id, ConsentType::BroadConsent, message_str)
+                    .send_consent(patient_id, ConsentType::BroadConsent, &message_str)
                     .await
                 {
                     Ok(status_code) => {
