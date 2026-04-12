@@ -7,7 +7,6 @@ use rdkafka::Message;
 use rdkafka::consumer::StreamConsumer;
 use reqwest::StatusCode;
 use std::str::FromStr;
-use tokio::time;
 use tracing::{error, info};
 
 mod consent_fhir_idat;
